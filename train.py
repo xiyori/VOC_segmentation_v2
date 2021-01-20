@@ -1,9 +1,10 @@
 import torch
 import numpy as np
 import segmentation_models_pytorch as smp
-import dataset as ds
+import loaders.voc as ds
 import utils as ut
-import log_tensorboard as log
+import log_tb as log
+from torch.utils.data import DataLoader
 
 
 if __name__ == '__main__':
@@ -15,7 +16,7 @@ if __name__ == '__main__':
         activation=ut.ACTIVATION,
     )
 
-    # model = torch.load("best_model.pth")
+    # model = torch.load("models/best_model.pth")
 
     train_dataset = ds.Dataset(
         ds.x_train_dir,
@@ -34,13 +35,18 @@ if __name__ == '__main__':
     )
 
     # test dataset without transformations for image visualization
-    test_dataset_vis = ds.Dataset(
-        ds.x_test_dir, ds.y_test_dir,
+    valid_dataset_vis = ds.Dataset(
+        ds.x_valid_dir, ds.y_valid_dir,
         classes=ut.CLASSES,
+        augmentation=ut.get_validation_augmentation(),
     )
 
-    train_loader = ds.DataLoader(train_dataset, batch_size=2, shuffle=True, num_workers=12)
-    valid_loader = ds.DataLoader(valid_dataset, batch_size=1, shuffle=False, num_workers=4)
+    train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True, num_workers=12)
+    valid_loader = DataLoader(valid_dataset, batch_size=64, shuffle=False, num_workers=24)
+
+    # for _, data in enumerate(train_loader, 0):
+    #     images, labels = data
+    #     pass
 
     optimizer = torch.optim.Adam([
         dict(params=model.parameters(), lr=0.0001),
@@ -67,19 +73,19 @@ if __name__ == '__main__':
 
     # init log
     n = 0
-    image_vis = np.moveaxis(test_dataset_vis[n][0].astype('uint8'), -1, 0)
+    image_vis = np.moveaxis(valid_dataset_vis[n][0].astype('uint8'), -1, 0)
     image, gt_mask = valid_dataset[n]
-    # gt_mask = gt_mask.squeeze()
+    gt_mask = ut.encode_map(np.argmax(gt_mask, 0))
+    gt_mask = gt_mask // 3 * 2 + image_vis // 3
     x_tensor = torch.from_numpy(image).to(ut.DEVICE).unsqueeze(0)
 
-    log.init("CamVid")
+    log.init("VOC_v2")
     log.add(0, images=(None, gt_mask, image_vis))
 
     # train model for some epochs
     max_score = 0
 
-    for i in range(0, 40):
-
+    for i in range(1, 40):
         print('\nEpoch: {}'.format(i))
         train_logs = train_epoch.run(train_loader)
         valid_logs = valid_epoch.run(valid_loader)
@@ -87,11 +93,12 @@ if __name__ == '__main__':
         # do something (save model, change lr, etc.)
         if max_score < valid_logs['iou_score']:
             max_score = valid_logs['iou_score']
-            torch.save(model, './best_model.pth')
+            torch.save(model, 'models/best_model.pth')
             print('Model saved!')
 
-        pr_mask = model.predict(x_tensor)
-        pr_mask = (pr_mask.squeeze(0).cpu().numpy().round())
+        pr_mask = model.predict(x_tensor).squeeze(0)
+        pr_mask = ut.encode_map(torch.max(pr_mask, 0)[1].cpu().numpy().round())
+        pr_mask = pr_mask // 3 * 2 + image_vis // 3
 
         log.add(i, (train_logs['iou_score'], valid_logs['iou_score'],
                     train_logs['dice_loss'], valid_logs['dice_loss'],

@@ -1,12 +1,13 @@
 import torch
 import segmentation_models_pytorch as smp
-import dataset as ds
+import loaders.voc as ds
 import utils as ut
+from torch.utils.data import DataLoader
 
 
 if __name__ == '__main__':
     # load best saved checkpoint
-    best_model = torch.load('./best_model.pth')
+    best_model = torch.load('models/voc_model_70%_iou.pth')
 
     # create test dataset
     test_dataset = ds.Dataset(
@@ -17,7 +18,7 @@ if __name__ == '__main__':
         classes=ut.CLASSES,
     )
 
-    test_dataloader = ds.DataLoader(test_dataset)
+    test_dataloader = DataLoader(test_dataset, batch_size=6)
 
     # evaluate model on test set
     test_epoch = smp.utils.train.ValidEpoch(

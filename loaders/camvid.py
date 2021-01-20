@@ -88,10 +88,10 @@ os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 DATA_DIR = 'data/CamVid/'
 
 # load repo with data if it is not exists
-if not os.path.exists(DATA_DIR):
-    print('Loading data...')
-    os.system('git clone https://github.com/alexgkendall/SegNet-Tutorial ./data')
-    print('Done!')
+# if not os.path.exists(DATA_DIR):
+#     print('Loading data...')
+#     os.system('git clone https://github.com/alexgkendall/SegNet-Tutorial ./data')
+#     print('Done!')
 
 x_train_dir = os.path.join(DATA_DIR, 'train')
 y_train_dir = os.path.join(DATA_DIR, 'trainannot')
