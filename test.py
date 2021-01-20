@@ -1,3 +1,4 @@
+import sys
 import torch
 import segmentation_models_pytorch as smp
 import loaders.voc as ds
@@ -18,7 +19,12 @@ if __name__ == '__main__':
         classes=ut.CLASSES,
     )
 
-    test_dataloader = DataLoader(test_dataset, batch_size=6)
+    if len(sys.argv) > 1:
+        batch = int(sys.argv[1])
+    else:
+        batch = ut.DEF_VAL_BATCH
+
+    test_dataloader = DataLoader(test_dataset, batch_size=batch)
 
     # evaluate model on test set
     test_epoch = smp.utils.train.ValidEpoch(

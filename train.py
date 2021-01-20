@@ -1,3 +1,4 @@
+import sys
 import torch
 import numpy as np
 import segmentation_models_pytorch as smp
@@ -41,8 +42,15 @@ if __name__ == '__main__':
         augmentation=ut.get_validation_augmentation(),
     )
 
-    train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True, num_workers=12)
-    valid_loader = DataLoader(valid_dataset, batch_size=64, shuffle=False, num_workers=24)
+    if len(sys.argv) > 2:
+        train_batch = int(sys.argv[1])
+        valid_batch = int(sys.argv[2])
+    else:
+        train_batch = ut.DEF_TRN_BATCH
+        valid_batch = ut.DEF_VAL_BATCH
+
+    train_loader = DataLoader(train_dataset, batch_size=train_batch, shuffle=True, num_workers=12)
+    valid_loader = DataLoader(valid_dataset, batch_size=valid_batch, shuffle=False, num_workers=12)
 
     # for _, data in enumerate(train_loader, 0):
     #     images, labels = data

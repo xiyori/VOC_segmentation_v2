@@ -143,6 +143,9 @@ CLASSES = ['background', 'aeroplane', 'bicycle', 'bird', 'boat',
 ACTIVATION = 'softmax2d'  # could be None for logits or 'softmax2d' for multicalss segmentation
 DEVICE = 'cuda:0'
 
+DEF_TRN_BATCH = 16
+DEF_VAL_BATCH = 32
+
 preprocessing_fn = smp.encoders.get_preprocessing_fn(ENCODER, ENCODER_WEIGHTS)
 
 # Dice/F1 score - https://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient

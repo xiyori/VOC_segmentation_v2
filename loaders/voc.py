@@ -74,7 +74,7 @@ class Dataset(BaseDataset):
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
-DATA_DIR = 'data/VOC2012/'
+DATA_DIR = '../MyDrive/data/VOC2012/'
 
 x_train_dir = os.path.join(DATA_DIR, 'train')
 y_train_dir = os.path.join(DATA_DIR, 'trainannot')
