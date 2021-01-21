@@ -93,7 +93,7 @@ if __name__ == '__main__':
     # train model for some epochs
     max_score = 0
 
-    for i in range(1, 40):
+    for i in range(0, 40):
         print('\nEpoch: {}'.format(i))
         train_logs = train_epoch.run(train_loader)
         valid_logs = valid_epoch.run(valid_loader)
